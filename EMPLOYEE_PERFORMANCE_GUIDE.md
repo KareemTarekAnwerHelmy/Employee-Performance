@@ -48,13 +48,14 @@ The dashboard pulls statistics from the following DocTypes based on specific fil
 | :--- | :--- | :--- | :--- | :--- |
 | **Total Leads** | `Lead` | `qualified_by` (User ID) | `qualified_on` | Counts leads qualified by the employee. |
 | **Opportunities** | `Opportunity` | `opportunity_owner` (User ID) | `creation` | Counts opportunities owned by the employee. |
-| **Active Customers** | `Customer` | `l.qualified_by` (Via Lead) | `l.creation` | Distinct customers linked to leads qualified by the employee. |
-| **Sales Invoices** | `Sales Invoice` | `owner` (User ID) | `posting_date` | Invoices created by the employee. |
-| **Attendance Stats** | `tabAttendance` | `employee` (Employee ID) | `attendance_date` | Present, Absent, and Half-Day counts. |
-| **Daily Reports** | `Daily Employee Report`| `employee` (Employee ID) | `date` | Total count of daily reports submitted. |
-| **Appointments** | `Appointment` | `custom_qualified_by` (Emp ID) | `scheduled_time` | Total appointments qualified/scheduled. |
-| **Activity Events** | `Event` | `custom_own` (Employee ID) | `starts_on` | Categorized events (Calls, Meetings, Emails). |
-| **Total Tasks** | `Task` | `custom_assign_to` (User ID)| `creation` | Tasks assigned to the employee. |
+| **Customers** | `Customer` | `l.qualified_by` (Via Lead) | `l.creation` | Distinct customers linked to leads qualified by the employee. |
+| **Conversion Rate** | `N/A` | `(Customers / Total Leads) * 100` | `N/A` | Percentage of leads converted to customers. |
+| **Attendance Overview** | `Attendance` | `employee_name` (Full Name) | `attendance_date` | Present, Absent, and Half-Day status breakdown. |
+| **Activity Distribution** | `Event` | `custom_own` (Employee ID) | `starts_on` | Categorized events (Calls, Meetings, Emails, etc.). |
+| **Total Attendance** | `Attendance` | `employee_name` (Full Name) | `attendance_date` | Total count of present days in the selected period. |
+| **Daily Report Count** | `Daily Employee Report` | `employee` (Employee ID) | `date` | Total count of daily reports submitted. |
+| **Appointments** | `Appointment` | `custom_qualified_by` (Employee ID) | `scheduled_time` | Total appointments qualified/scheduled. |
+| **Total Task** | `Task` | `custom_assign_to` (User ID) | `creation` | Total tasks assigned to the employee. |
 
 ---
 
