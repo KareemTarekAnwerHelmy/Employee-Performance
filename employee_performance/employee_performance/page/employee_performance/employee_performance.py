@@ -199,10 +199,10 @@ def get_employee_dashboard(employee, from_date=None, to_date=None):
             SUM(CASE WHEN status = 'Absent'   THEN 1 ELSE 0 END) AS absent,
             SUM(CASE WHEN status = 'Half Day' THEN 1 ELSE 0 END) AS half_day
         FROM `tabAttendance`
-        WHERE employee = %s
+        WHERE employee_name = %s
           AND docstatus IN (0, 1)
           AND attendance_date BETWEEN %s AND %s
-    """, (employee, start_date, end_date), as_dict=True)
+    """, (employee_name, start_date, end_date), as_dict=True)
 
     attendance_stats = attendance_stats_list[0] if attendance_stats_list else {}
 
@@ -228,7 +228,7 @@ def get_employee_dashboard(employee, from_date=None, to_date=None):
     checkins = frappe.db.get_all(
         "Employee Checkin",
         filters={
-            "employee": employee,
+            "employee_name": employee_name,
             "time": ["between", [start_date, upper_bound]]
         },
         fields=["time", "log_type"],

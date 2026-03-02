@@ -34,11 +34,11 @@ function render_layout(page) {
 					<div class="epd-filter-field" id="employee-selector-container"></div>
 					<div class="epd-date-field">
 						<label class="epd-date-label">${__('From')}</label>
-						<input type="date" id="epd-from-date" class="epd-date-input">
+						<div id="epd-from-date-wrap" class="epd-date-input"></div>
 					</div>
 					<div class="epd-date-field">
 						<label class="epd-date-label">${__('To')}</label>
-						<input type="date" id="epd-to-date" class="epd-date-input">
+						<div id="epd-to-date-wrap" class="epd-date-input"></div>
 					</div>
 					<button class="btn btn-primary btn-sm epd-apply-btn" id="epd-apply-btn">
 						<i class="fa fa-check" style="margin-right:5px;"></i>${__('Apply')}
@@ -177,17 +177,34 @@ function init_dashboard(page) {
         render_input: true
     });
 
-    // --- Native date inputs (calendar picker, no free typing) ---
-    let $from = $('#epd-from-date');
-    let $to = $('#epd-to-date');
-    $from.val(get_first_day_of_month());
-    $to.val(get_today());
+    // --- Frappe DatePicker controls (renders as DD/MM/YYYY) ---
+    let from_ctrl = frappe.ui.form.make_control({
+        parent: $('#epd-from-date-wrap'),
+        df: {
+            label: '',
+            fieldtype: 'Date',
+            fieldname: 'from_date'
+        },
+        render_input: true
+    });
+    from_ctrl.set_value(get_first_day_of_month());
+
+    let to_ctrl = frappe.ui.form.make_control({
+        parent: $('#epd-to-date-wrap'),
+        df: {
+            label: '',
+            fieldtype: 'Date',
+            fieldname: 'to_date'
+        },
+        render_input: true
+    });
+    to_ctrl.set_value(get_today());
 
     // --- Apply button ---
     $('#epd-apply-btn').on('click', function () {
         let emp = selector.get_value();
-        let from = $from.val();
-        let to = $to.val();
+        let from = from_ctrl.get_value();
+        let to = to_ctrl.get_value();
         if (!emp) {
             frappe.msgprint(__('Please select an employee first.'));
             return;
@@ -203,7 +220,7 @@ function init_dashboard(page) {
     frappe.db.get_value('Employee', { user_id: frappe.session.user }, 'name').then(r => {
         if (r && r.message && r.message.name) {
             selector.set_value(r.message.name);
-            refresh_dashboard(r.message.name, $from.val(), $to.val());
+            refresh_dashboard(r.message.name, from_ctrl.get_value(), to_ctrl.get_value());
         }
     });
 
@@ -403,28 +420,30 @@ function render_attendance_donut(data) {
     let $container = $("#" + container_id);
     if (!$container.length) return;
 
+    // Always destroy the old chart and wipe the DOM — donut .update() caches stale data
+    if (epd_charts.attendance_donut) {
+        try { epd_charts.attendance_donut.destroy(); } catch (e) { }
+        epd_charts.attendance_donut = null;
+    }
+    $container.empty();
+
     let total = (data && data.values) ? data.values.reduce((a, b) => a + b, 0) : 0;
 
     let chart_data = {
         labels: total > 0 ? data.labels : [__("No Data")],
-        datasets: [{ values: total > 0 ? data.values : [1] }] // Donut chart needs at least 1 value to draw a circle
+        datasets: [{ values: total > 0 ? data.values : [1] }]
     };
 
-    // For empty donut, make it grey
+    // Use grey when there is no data
     let current_colors = total > 0 ? ['#22c55e', '#ef4444', '#f59e0b'] : ['#e2e8f0'];
 
-    if (epd_charts.attendance_donut) {
-        // Frappe chart doesn't gracefully update colors via update(), but the data will at least render.
-        epd_charts.attendance_donut.update(chart_data);
-    } else {
-        epd_charts.attendance_donut = new frappe.Chart("#" + container_id, {
-            data: chart_data,
-            type: 'donut',
-            height: 280,
-            colors: current_colors,
-            donutOptions: { strokeWidth: 40 }
-        });
-    }
+    epd_charts.attendance_donut = new frappe.Chart("#" + container_id, {
+        data: chart_data,
+        type: 'donut',
+        height: 280,
+        colors: current_colors,
+        donutOptions: { strokeWidth: 40 }
+    });
 }
 
 function render_activity_timeline(reports) {
